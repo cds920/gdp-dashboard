@@ -13,7 +13,6 @@ import os
 FONT_PATH = os.path.join(os.path.dirname(__file__), '../fonts/NanumGothic-Regular.ttf')
 fontprop = fm.FontProperties(fname=FONT_PATH)
 plt.rcParams['axes.unicode_minus'] = False
-fm._rebuild()  # 폰트 캐시 리셋
 
 st.title(":bar_chart: 학생 성적 분석")
 st.caption("학생별 성적을 입력하면 등수, 평균, 그룹화 결과를 보여줍니다.")
