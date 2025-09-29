@@ -1,151 +1,108 @@
+
 import streamlit as st
+import numpy as np
 import pandas as pd
-import math
-from pathlib import Path
 
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
+st.set_page_config(page_title="Streamlit Elements Showcase", page_icon=":star:", layout="wide")
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
+st.title(":star: Streamlit 요소 총집합 데모")
+st.caption("Streamlit에서 제공하는 다양한 UI 요소와 기능을 한 페이지에 모았습니다.")
 
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
+st.header("기본 텍스트 요소")
+st.text("이것은 일반 텍스트입니다.")
+st.markdown("**마크다운** _스타일링_ :rainbow:")
+st.code("print('Hello, Streamlit!')", language="python")
+st.latex(r"""
+E = mc^2
+""")
+st.write("st.write()는 다양한 타입을 자동으로 렌더링합니다.", {"a": 1, "b": 2})
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
+st.header("데이터 표시")
+df = pd.DataFrame(np.random.randn(10, 5), columns=list("ABCDE"))
+st.dataframe(df, use_container_width=True)
+st.table(df.head(3))
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
+st.header("차트와 그래프")
+st.line_chart(df)
+st.bar_chart(df)
+st.area_chart(df)
 
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
+st.header("상호작용 위젯")
+name = st.text_input("이름을 입력하세요:", "홍길동")
+age = st.number_input("나이", min_value=0, max_value=120, value=25)
+agree = st.checkbox("개인정보 제공에 동의합니다.")
+gender = st.radio("성별", ["남성", "여성", "기타"])
+color = st.selectbox("좋아하는 색상", ["빨강", "초록", "파랑", "노랑"])
+multi = st.multiselect("관심 있는 분야", ["AI", "데이터", "웹", "모바일", "게임"])
+date = st.date_input("날짜 선택")
+time = st.time_input("시간 선택")
+slider = st.slider("점수(0~100)", 0, 100, 50)
+file = st.file_uploader("파일 업로드")
+st.color_picker("색상 선택", "#00f900")
 
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
+st.header("버튼과 폼")
+if st.button("버튼 클릭!"):
+    st.success(f"{name}님, 버튼을 클릭하셨습니다!")
 
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
+with st.form("my_form"):
+    st.write("폼 내부 요소 예시")
+    form_text = st.text_input("폼 텍스트 입력")
+    submitted = st.form_submit_button("제출")
+    if submitted:
+        st.info(f"폼 제출: {form_text}")
 
-    return gdp_df
+st.header("상태 표시 및 알림")
+st.success("성공 메시지 예시")
+st.info("정보 메시지 예시")
+st.warning("경고 메시지 예시")
+st.error("에러 메시지 예시")
+with st.spinner("로딩 중..."):
+    import time; time.sleep(0.5)
+st.balloons()
 
-gdp_df = get_gdp_data()
+st.header("사이드바")
+st.sidebar.title("사이드바 제목")
+st.sidebar.write("사이드바에 다양한 위젯을 넣을 수 있습니다.")
+sidebar_option = st.sidebar.selectbox("옵션 선택", ["옵션1", "옵션2", "옵션3"])
 
-# -----------------------------------------------------------------------------
-# Draw the actual page
+st.header("탭, 컬럼, 익스팬더")
+tab1, tab2 = st.tabs(["탭 1", "탭 2"])
+with tab1:
+    st.write("첫 번째 탭 내용")
+with tab2:
+    st.write("두 번째 탭 내용")
 
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
+col1, col2, col3 = st.columns(3)
+col1.metric("온도", "23°C", "+1.2°C")
+col2.metric("습도", "60%", "-5%")
+col3.metric("강수량", "5mm", "+2mm")
 
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
+with st.expander("더보기/접기 예시"):
+    st.write("이곳에 추가 설명이나 옵션을 넣을 수 있습니다.")
 
-# Add some spacing
-''
-''
+st.header("카메라 입력, 오디오, 비디오")
+# 카메라 입력은 실제 웹캠이 있을 때만 동작
+st.camera_input("사진 촬영")
+st.audio(np.random.randn(44100), sample_rate=44100)
+st.video("https://www.w3schools.com/html/mov_bbb.mp4")
 
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
+st.header("진행률, 상태바")
+import time
+progress = st.progress(0)
+for i in range(1, 101, 10):
+    time.sleep(0.05)
+    progress.progress(i)
+st.write("진행 완료!")
 
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
+st.header("코드 실행 및 예외 처리")
+try:
+    st.write(1 / 0)
+except Exception as e:
+    st.exception(e)
 
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
-]
-
-st.header('GDP over time', divider='gray')
-
-''
-
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
-)
-
-''
-''
-
-
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
-
-st.header(f'GDP in {to_year}', divider='gray')
-
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
-        else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
-
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+st.header("st.session_state 예시")
+if 'count' not in st.session_state:
+    st.session_state['count'] = 0
+if st.button("카운트 증가"):
+    st.session_state['count'] += 1
+st.write(f"카운트: {st.session_state['count']}")
