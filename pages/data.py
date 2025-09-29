@@ -1,6 +1,17 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import os
+
+
+# 한글 폰트 설정 (NanumGothic)
+FONT_PATH = os.path.join(os.path.dirname(__file__), '../fonts/NanumGothic-Regular.ttf')
+fontprop = fm.FontProperties(fname=FONT_PATH)
+plt.rc('font', family=fontprop.get_name())
+plt.rcParams['axes.unicode_minus'] = False
 
 st.title(":bar_chart: 학생 성적 분석")
 st.caption("학생별 성적을 입력하면 등수, 평균, 그룹화 결과를 보여줍니다.")
@@ -50,8 +61,17 @@ avg_row = pd.DataFrame({
 })
 st.table(avg_row)
 
-st.subheader("성적 분포 시각화")
-st.bar_chart(df.set_index('이름')[['국어', '영어', '수학']])
+
+st.subheader("성적 분포 시각화 (matplotlib)")
+fig, ax = plt.subplots(figsize=(7, 4))
+df_plot = df.set_index('이름')[['국어', '영어', '수학']]
+df_plot.plot(kind='bar', ax=ax)
+ax.set_ylabel('점수', fontproperties=fontprop)
+ax.set_xlabel('이름', fontproperties=fontprop)
+ax.set_title('과목별 성적 분포', fontproperties=fontprop)
+plt.xticks(fontproperties=fontprop)
+plt.yticks(fontproperties=fontprop)
+st.pyplot(fig)
 
 st.subheader("그룹화: 평균 90점 이상 우수 그룹")
 df['그룹'] = np.where(df['평균'] >= 90, '우수', '일반')
